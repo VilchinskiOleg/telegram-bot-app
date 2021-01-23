@@ -8,7 +8,6 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,12 +15,6 @@ import java.util.stream.Collectors;
 public class TelegramBotApiListener extends TelegramLongPollingBot {
 
     private CitiesService citiesService;
-//    private Map<String, String> systemCommands = new HashMap<>() {
-//        {
-//            put("/start", "This is touristic telegram-bot.\nYou need to input some city, and you will get some information about it");
-//            put("/help", "");
-//        }
-//    };
 
     public TelegramBotApiListener(CitiesService citiesService) {
         this.citiesService = citiesService;
@@ -47,7 +40,8 @@ public class TelegramBotApiListener extends TelegramLongPollingBot {
         }
 
         if (message.equals("/start")) {
-            String answer = "This is touristic telegram-bot.\nYou need to input some city, and you will get some information about it";
+            String answer = "This is touristic telegram-bot." +
+                    "\nYou need to input some city, and you will get some information about it";
             sendMsg(chatId, answer, false);
         } else if (message.equals("/help")) {
             String title = "Доступные города:\n";

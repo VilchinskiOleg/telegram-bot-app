@@ -3,6 +3,7 @@ package com.resliv.bot.controller;
 import com.resliv.bot.entity.City;
 import com.resliv.bot.service.CitiesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -20,6 +21,14 @@ public class AdminBotApi {
         this.telegramBotApiListener = telegramBotApiListener;
     }
 
+    @ExceptionHandler(value = RuntimeException.class)
+    public ResponseEntity<?> exceptionHandler(RuntimeException e) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .header("Result", e.getMessage())
+                .build();
+    }
+
     /**
      * Method for creating new city with description or not by GET method.
      * @param token a telegram bot token for checking.
@@ -33,11 +42,22 @@ public class AdminBotApi {
         if (checkToken(token)) {
             if (value == null) {
                 citiesService.createCity(key);
+                return ResponseEntity
+                        .ok()
+                        .header("Result", "Create new city")
+                        .build();
             } else {
                 citiesService.createCity(key, value);
+                return ResponseEntity
+                        .ok()
+                        .header("Result", "Create new city and description")
+                        .build();
             }
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .badRequest()
+                .header("Result", "Token is wrong")
+                .build();
     }
 
     /**
@@ -50,8 +70,15 @@ public class AdminBotApi {
                                                        @RequestBody City city) {
         if (checkToken(token)) {
             citiesService.createCity(city);
+            return ResponseEntity
+                    .ok()
+                    .header("Result", "Create a copy of the input object")
+                    .build();
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .badRequest()
+                .header("Result", "Token is wrong")
+                .build();
     }
 
 
@@ -64,16 +91,27 @@ public class AdminBotApi {
         if (checkToken(token)) {
             if (rul.equals("-new")) {
                 citiesService.updateCityByNameNewDescription(key, value);
+                return ResponseEntity
+                        .ok()
+                        .header("Result", "Add new description, old values are erased")
+                        .build();
             } else if (rul.equals("-add")) {
                 citiesService.updateCityByNameAddDescription(key, value);
+                return ResponseEntity
+                        .ok()
+                        .header("Result", "Add new description, old values are saved")
+                        .build();
             } else {
                 return ResponseEntity
                         .badRequest()
-                        .header("Reason", "Such rul does not exist!")
+                        .header("Result", "Such rul does not exist")
                         .build();
             }
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .badRequest()
+                .header("Result", "Token is wrong")
+                .build();
     }
 
     @PostMapping(path = "/{bot-token}/update/{rul}")
@@ -83,27 +121,45 @@ public class AdminBotApi {
         if (checkToken(token)) {
             if (rul.equals("-new")) {
                 citiesService.updateCityByNameNewDescription(city.getName(), city.getDescriptions().toArray(String[]::new));
+                return ResponseEntity
+                        .ok()
+                        .header("Result", "Add new descriptions, old values are erased")
+                        .build();
             } else if (rul.equals("-add")) {
                 citiesService.updateCityByNameAddDescription(city.getName(), city.getDescriptions().toArray(String[]::new));
+                return ResponseEntity
+                        .ok()
+                        .header("Result", "Add new descriptions, old values are saved")
+                        .build();
             } else {
                 return ResponseEntity
                         .badRequest()
-                        .header("Reason", "Such rul does not exist!")
+                        .header("Result", "Such rul does not exist")
                         .build();
             }
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .badRequest()
+                .header("Result", "Token is wrong")
+                .build();
     }
 
 
 
     @DeleteMapping(path = "/{bot-token}")
     public ResponseEntity<?> deleteCityByGetMethod(@PathVariable("bot-token") String token,
-                                                   @RequestParam("name") String key) {
+                                                   @RequestParam("key") String key) {
         if (checkToken(token)) {
             citiesService.deleteCityByName(key);
+            return ResponseEntity
+                    .ok()
+                    .header("Result", "Current city and its descriptions are erased")
+                    .build();
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .badRequest()
+                .header("Result", "Token is wrong")
+                .build();
     }
 
     private boolean checkToken(String receivedToken) {
