@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,12 +21,7 @@ public class City {
     private long id;
 
     String name;
-    @ElementCollection(fetch = FetchType.EAGER)
-    @OrderColumn(name = "index", nullable = false)
-    @Column(nullable = false)
-    List<String> descriptions;
-
-    public List<String> getDescriptions() {
-        return descriptions == null ? null : new ArrayList<>(descriptions);
-    }
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "city_id", referencedColumnName = "id")
+    List<Description> descriptions;
 }

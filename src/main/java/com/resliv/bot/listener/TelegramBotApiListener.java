@@ -9,12 +9,32 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class TelegramBotApiListener extends TelegramLongPollingBot {
 
     private CitiesService citiesService;
+    private final Map<String, Supplier<String>> SYSTEM_COMMAND = new HashMap<>();
+    private static final String HELP_MESSAGE = "I don't have such a city ...";
+
+    {
+        SYSTEM_COMMAND.put("/start", () -> "This is touristic telegram-bot." +
+                "\nYou need to input some city, then you will get some information about it");
+        SYSTEM_COMMAND.put("/help", () -> {
+            String title = "Доступные города:\n";
+            List<String> names = citiesService.getAllCitiesNames();
+            if (names.isEmpty()) return title.concat("Список городов пуст...");
+            String descriptions = names
+                    .stream()
+                    .map(item -> item + "\n")
+                    .collect(Collectors.joining());
+            return title.concat(descriptions);
+        });
+    }
 
     public TelegramBotApiListener(CitiesService citiesService) {
         this.citiesService = citiesService;
@@ -39,26 +59,16 @@ public class TelegramBotApiListener extends TelegramLongPollingBot {
             chatId = from.getId().toString();
         }
 
-        if (message.equals("/start")) {
-            String answer = "This is touristic telegram-bot." +
-                    "\nYou need to input some city, and you will get some information about it";
-            sendMsg(chatId, answer, false);
-        } else if (message.equals("/help")) {
-            String title = "Доступные города:\n";
-            String description = citiesService.getAllCitiesNames()
-                    .stream()
-                    .map(item -> item + "\n")
-                    .collect(Collectors.joining());
-            String answer = title.concat(description);
-            sendMsg(chatId, answer, false);
+        Supplier<String> func;
+        if ((func = SYSTEM_COMMAND.get(message)) != null) {
+            sendMsg(chatId, func.get(), false);
         } else if (citiesService.existCityByName(message)) {
             List<String> answers = citiesService.getDescriptionsByCityName(message);
             for (String answer : answers) {
                 sendMsg(chatId, answer, false);
             }
         } else {
-            String answer = "I don't have such a city ...";
-            sendMsg(chatId, answer, true);
+            sendMsg(chatId, HELP_MESSAGE, true);
         }
     }
 
@@ -73,9 +83,7 @@ public class TelegramBotApiListener extends TelegramLongPollingBot {
                 .chatId(chatId)
                 .text(str)
                 .build();
-        if (onSupport) {
-            setHelpButton(response);
-        }
+        if (onSupport) setHelpButton(response);
         try {
             execute(response);
         } catch (TelegramApiException e) {
