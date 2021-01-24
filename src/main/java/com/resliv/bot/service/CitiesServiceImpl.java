@@ -35,8 +35,14 @@ public class CitiesServiceImpl implements CitiesService {
 
 
 
+    /**
+     * Method that creates a copy of the input object and saves it to the database.
+     * @param city a new city object.
+     * @throws IllegalArgumentException if the city is null.
+     * @throws RuntimeException if such city already exist in database.
+     * */
     @Override
-    public void createCity(City city) {
+    public synchronized void createCity(City city) {
         if (city == null) {
             throw new IllegalArgumentException("city is null");
         }
@@ -46,8 +52,14 @@ public class CitiesServiceImpl implements CitiesService {
         citiesRepository.save(city);
     }
 
+    /**
+     * Method that creates new city with out any description and saves it to the database.
+     * @param name a name for new city object.
+     * @throws IllegalArgumentException if the name is null.
+     * @throws RuntimeException if such city already exist in database.
+     * */
     @Override
-    public void createCity(String name) {
+    public synchronized void createCity(String name) {
         if (name == null) {
             throw new IllegalArgumentException("city name is null");
         }
@@ -58,8 +70,15 @@ public class CitiesServiceImpl implements CitiesService {
         citiesRepository.save(city);
     }
 
+    /**
+     * Method that creates new city with some description and saves it to the database.
+     * @param name a name for new city object.
+     * @param description a description for new city object.
+     * @throws IllegalArgumentException if the name or description is null.
+     * @throws RuntimeException if such city already exist in database.
+     * */
     @Override
-    public void createCity(String name, String description) {
+    public synchronized void createCity(String name, String description) {
         if (name == null) {
             throw new IllegalArgumentException("city name is null");
         } else if (description == null) {
@@ -74,8 +93,16 @@ public class CitiesServiceImpl implements CitiesService {
         citiesRepository.save(city);
     }
 
+    /**
+     * Method that finds and updates city by input name, and saves changes to the database.
+     * @param rul a specific marker (property) for definition the details of the updating.
+     * @param name a name for looking for a necessary city.
+     * @param descriptions a array of descriptions which you wont to add in current city.
+     * @throws IllegalArgumentException if the name or rul is null.
+     * @throws RuntimeException if such city does not exist in database.
+     * */
     @Override
-    public void updateCityByName(String rul, String name, String... descriptions) {
+    public synchronized void updateCityByName(String rul, String name, String... descriptions) {
         if (name == null) {
             throw new IllegalArgumentException("city name is null");
         } else if (rul == null) {
@@ -99,9 +126,14 @@ public class CitiesServiceImpl implements CitiesService {
         citiesRepository.save(city);
     }
 
-
+    /**
+     * Method that finds and deletes city from database by input name.
+     * @param name a name for looking for a necessary city.
+     * @throws IllegalArgumentException if the name is null.
+     * @throws RuntimeException if such city does not exist in database.
+     * */
     @Override
-    public void deleteCityByName(String name) {
+    public synchronized void deleteCityByName(String name) {
         if (name == null) {
             throw new IllegalArgumentException("city name is null!");
         }
@@ -113,6 +145,12 @@ public class CitiesServiceImpl implements CitiesService {
 
 
 
+    /**
+     * Method that checks if the required city is in the database or not, by the input name
+     * @param name a name for looking for a necessary city.
+     * @throws IllegalArgumentException if the name is null.
+     * @return true if such city in the database, or false if not.
+     * */
     @Override
     public boolean existCityByName(String name) {
         if (name == null) {
@@ -121,6 +159,12 @@ public class CitiesServiceImpl implements CitiesService {
         return citiesRepository.existsByName(name);
     }
 
+    /**
+     * Method that finds and gets descriptions by cities name.
+     * @param name a name for looking for a necessary city.
+     * @throws IllegalArgumentException if the name is null.
+     * @return list of descriptions values as Strings.
+     * */
     @Override
     public List<String> getDescriptionsByCityName(String name) {
         if (name == null) {
@@ -136,6 +180,10 @@ public class CitiesServiceImpl implements CitiesService {
         return Collections.emptyList();
     }
 
+    /**
+     * Method that gets list of names of all active cities.
+     * @return list of names of all active cities as Strings.
+     * */
     @Override
     public List<String> getAllCitiesNames() {
         return citiesRepository.findAllCitiesNames();

@@ -24,6 +24,13 @@ public class AdminBotApi {
         this.telegramBotApiListener = telegramBotApiListener;
     }
 
+
+
+    /**
+     * Method that catches exceptions thrown by the service and other classes in this controller
+     * @param e an input exception instance for processing.
+     * @return the ResponseEntity object with with a specific status and its explanation in the header "Result".
+     * */
     @ExceptionHandler(value = RuntimeException.class)
     public ResponseEntity<?> exceptionHandler(RuntimeException e) {
         return ResponseEntity
@@ -33,11 +40,14 @@ public class AdminBotApi {
 
     }
 
+
+
     /**
      * Method for creating new city with description or not by GET method.
-     * @param token a telegram bot token for checking.
+     * @param token a telegram bot's token for checking.
      * @param key a name for new city.
-     * @param value a description for new city (can be empty).
+     * @param value a description for new city (optional parameter).
+     * @return the ResponseEntity object with with a specific status and its explanation in the header "Result".
     * */
     @GetMapping(path = "/{bot-token}/create")
     public ResponseEntity<?> createNewCityByGetMethod(@PathVariable("bot-token") String token,
@@ -66,8 +76,9 @@ public class AdminBotApi {
 
     /**
      * Method for creating new city object by POST method.
-     * @param token a telegram bot token for checking.
+     * @param token a telegram bot's token for checking.
      * @param city a new city object.
+     * @return the ResponseEntity object with with a specific status and its explanation in the header "Result".
      * */
     @PostMapping(path = "/{bot-token}/create")
     public ResponseEntity<?> createNewCityByPostMethod(@PathVariable("bot-token") String token,
@@ -87,6 +98,14 @@ public class AdminBotApi {
 
 
 
+    /**
+     * Method for updating city description by GET method.
+     * @param token a telegram bot's token for checking.
+     * @param rul a specific marker (property) for definition the details of the updating.
+     * @param key a name for looking for a city.
+     * @param value an additional description.
+     * @return the ResponseEntity object with with a specific status and its explanation in the header "Result".
+     * */
     @GetMapping(path = "/{bot-token}/update/{rul}")
     public ResponseEntity<?> updateCityByGetMethod(@PathVariable("bot-token") String token,
                                                    @PathVariable("rul") String rul,
@@ -118,6 +137,14 @@ public class AdminBotApi {
                 .build();
     }
 
+    /**
+     * Method for updating city description by POST method.
+     * @param token a telegram bot's token for checking.
+     * @param rul a specific marker (property) for definition the details of the updating.
+     * @param city a City object to copy its fields as additional descriptions.
+     * The field "name" of this object will be used to find the target for updating.
+     * @return the ResponseEntity object with with a specific status and its explanation in the header "Result".
+     * */
     @PostMapping(path = "/{bot-token}/update/{rul}")
     public ResponseEntity<?> updateCityByPostMethod(@PathVariable("bot-token") String token,
                                                     @PathVariable("rul") String rul,
@@ -158,6 +185,12 @@ public class AdminBotApi {
 
 
 
+    /**
+     * Method for delete city by DELETE method.
+     * @param token a telegram bot's token for checking.
+     * @param key a name for looking for a city.
+     * @return the ResponseEntity object with with a specific status and its explanation in the header "Result".
+     * */
     @DeleteMapping(path = "/{bot-token}")
     public ResponseEntity<?> deleteCityByGetMethod(@PathVariable("bot-token") String token,
                                                    @RequestParam("key") String key) {
@@ -174,6 +207,14 @@ public class AdminBotApi {
                 .build();
     }
 
+
+
+    /**
+     * Private method for checking bot's token. This method use TelegramLongPollingBot for getting registered telegram bot's token
+     * and compares with the input value.
+     * @param receivedToken an input telegram bot token value.
+     * @return true if values matches, or false if not.
+     * */
     private boolean checkToken(String receivedToken) {
         return telegramBotApiListener.getBotToken().equals(receivedToken);
     }

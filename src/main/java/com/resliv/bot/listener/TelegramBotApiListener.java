@@ -22,12 +22,12 @@ public class TelegramBotApiListener extends TelegramLongPollingBot {
     private static final String HELP_MESSAGE = "I don't have such a city ...";
 
     {
-        SYSTEM_COMMAND.put("/start", () -> "This is touristic telegram-bot." +
+        SYSTEM_COMMAND.put("/start", () -> "Hello!:)This is touristic telegram-bot." +
                 "\nYou need to input some city, then you will get some information about it");
         SYSTEM_COMMAND.put("/help", () -> {
-            String title = "Доступные города:\n";
+            String title = "Accessible cities:\n";
             List<String> names = citiesService.getAllCitiesNames();
-            if (names.isEmpty()) return title.concat("Список городов пуст...");
+            if (names.isEmpty()) return title.concat("list is empty...");
             String descriptions = names
                     .stream()
                     .map(item -> item + "\n")
@@ -43,7 +43,7 @@ public class TelegramBotApiListener extends TelegramLongPollingBot {
 
 
     /**
-     * Method for receiving messages.
+     * Method for receiving messages from Telegram Bot API.
      * @param update Contains a message from the user.
      */
     @Override
@@ -73,9 +73,10 @@ public class TelegramBotApiListener extends TelegramLongPollingBot {
     }
 
     /**
-     * Method for creating a message and sending it.
-     * @param chatId chat id
-     * @param str The String that you want to send as a message.
+     * Method for creating a message and sending it to user.
+     * @param chatId chat id.
+     * @param str the String that you want to send as a message.
+     * @param onSupport the marker for creating (or not) button in current message.
      */
     private synchronized void sendMsg(String chatId, String str, boolean onSupport) {
         SendMessage response = SendMessage
@@ -92,8 +93,8 @@ public class TelegramBotApiListener extends TelegramLongPollingBot {
     }
 
     /**
-     * Method for adding a button that will bring up a list of active cities.
-     * @param response container for sending a message.
+     * Method for adding a button that will bring up a list of active cities names.
+     * @param response container for outgoing message.
      */
     private void setHelpButton(SendMessage response) {
         InlineKeyboardButton button = InlineKeyboardButton
