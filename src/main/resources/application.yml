@@ -1,7 +1,7 @@
 bot:
   credentials:
-    username: AnastasiiaQuizBot
-    token: 6627619932:AAFySn-HE7xurmgRbDCBy23OUbPYiD_cwjc
+    username: X
+    token: X
 
 #feign:
 #  client:
@@ -18,7 +18,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: vin76423@gmail.com
-    password: bwaqttagderxkmmu
+    password: X
     properties:
       mail:
 #        debug: true
@@ -78,7 +78,7 @@ quiz-data:
       right: true
     -
       question: Что такое "Катить" ?
-      answer: Отправлять работу на #у@
+      answer: Отправлять работу на
       right: false
     -
       question: Что такое "Катить" ?
