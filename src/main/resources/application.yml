@@ -1,0 +1,90 @@
+bot:
+  credentials:
+    username: AnastasiiaQuizBot
+    token: 6627619932:AAFySn-HE7xurmgRbDCBy23OUbPYiD_cwjc
+
+#feign:
+#  client:
+#    config:
+#      emailSenderApiClient:
+#        connectTimeout: 10000
+#        readTimeout: 15000
+#        loggerLevel: full
+#        requestInterceptors:
+#          - com.resliv.bot.configuration.client.notification.RapidEmailSenderApiInterceptor
+
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: vin76423@gmail.com
+    password: bwaqttagderxkmmu
+    properties:
+      mail:
+#        debug: true
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+#          connectiontimeout: 5000
+#          writetimeout: 5000
+#          timeout: 5000
+          starttls:
+            enable: true
+
+
+
+quiz-data:
+  items:
+    -
+      question: Что такое "Костыль" ?
+      answer: для передвижения после травмы
+      right: false
+    -
+      question: Что такое "Костыль" ?
+      answer: кривое решение в кодинге принятое на спех
+      right: true
+    -
+      question: Что такое "Костыль" ?
+      answer: ХЗ!
+      right: false
+    -
+      question: Что такое "Костыль" ?
+      answer: вещь из секс-шопа..
+      right: false
+
+
+    -
+      question: Что такое "Спека" ?
+      answer: продукция пекаря
+      right: false
+    -
+      question: Что такое "Спека" ?
+      answer: вид униформы .. как роба
+      right: false
+    -
+      question: Что такое "Спека" ?
+      answer: документация по технологи
+      right: true
+    -
+      question: Что такое "Спека" ?
+      answer: имя из одного из древнего языка
+      right: false
+
+
+    -
+      question: Что такое "Катить" ?
+      answer: Отправлять готовую работу в деплой
+      right: true
+    -
+      question: Что такое "Катить" ?
+      answer: Отправлять работу на #у@
+      right: false
+    -
+      question: Что такое "Катить" ?
+      answer: огрессировать на коллегу
+      right: false
+    -
+      question: Что такое "Катить" ?
+      answer: укатываться домой со всех ног!
+      right: false

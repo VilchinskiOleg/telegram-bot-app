@@ -1,45 +1,32 @@
 package com.resliv.bot.listener;
 
-import com.resliv.bot.service.CitiesService;
+import com.resliv.bot.configuration.TelegramBotCredentialsProperties;
+import com.resliv.bot.dto.Message;
+import com.resliv.bot.service.NotificationManager;
+import com.resliv.bot.state.QuizState;
+import com.resliv.bot.state.State;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.ListIterator;
+
+import static java.util.Objects.isNull;
+
+@Slf4j
+@RequiredArgsConstructor
 public class TelegramBotApiListener extends TelegramLongPollingBot {
 
-    private CitiesService citiesService;
-    private final Map<String, Supplier<String>> SYSTEM_COMMAND = new HashMap<>();
-    private static final String HELP_MESSAGE = "I don't have such a city ...";
-
-    {
-        SYSTEM_COMMAND.put("/start", () -> "Hello!:)This is touristic telegram-bot." +
-                "\nYou need to input some city, then you will get some information about it");
-        SYSTEM_COMMAND.put("/help", () -> {
-            String title = "Accessible cities:\n";
-            List<String> names = citiesService.getAllCitiesNames();
-            if (names.isEmpty()) return title.concat("list is empty...");
-            String descriptions = names
-                    .stream()
-                    .map(item -> item + "\n")
-                    .collect(Collectors.joining());
-            return title.concat(descriptions);
-        });
-    }
-
-    public TelegramBotApiListener(CitiesService citiesService) {
-        this.citiesService = citiesService;
-    }
-
+    private final TelegramBotCredentialsProperties credentialsProperties;
+    private final NotificationManager notificationManager;
+    private final QuizState currentState; //todo: hardcoded.
+//    private final List<State> states;
 
 
     /**
@@ -48,82 +35,41 @@ public class TelegramBotApiListener extends TelegramLongPollingBot {
      */
     @Override
     public void onUpdateReceived(Update update) {
-        String message = null;
-        String chatId = null;
-        if (update.hasMessage()) {
-            message = update.getMessage().getText();
-            chatId = update.getMessage().getChatId().toString();
-        } else if (update.hasCallbackQuery()) {
-            message = update.getCallbackQuery().getData();
-            User from = update.getCallbackQuery().getFrom();
-            chatId = from.getId().toString();
+        var message = extractMessage(update);
+
+        if (isNull(message)) {
+            log.warn("Message from user is empty");
+            return;
         }
 
-        Supplier<String> func;
-        if ((func = SYSTEM_COMMAND.get(message)) != null) {
-            sendMsg(chatId, func.get(), false);
-        } else if (citiesService.existCityByName(message)) {
-            List<String> answers = citiesService.getDescriptionsByCityName(message);
-            for (String answer : answers) {
-                sendMsg(chatId, answer, false);
-            }
-        } else {
-            sendMsg(chatId, HELP_MESSAGE, true);
-        }
+//        if (isNull(currentState)) {
+//            ListIterator<State> iterator = states.listIterator();
+//            while (iterator.hasNext() && !iterator.next().isApplicable(message)){}
+//            //todo: choose state.
+//        }
+
+        currentState.handle(message, this);
     }
 
     /**
-     * Method for creating a message and sending it to user.
-     * @param chatId chat id.
-     * @param str the String that you want to send as a message.
-     * @param onSupport the marker for creating (or not) button in current message.
-     */
-    private synchronized void sendMsg(String chatId, String str, boolean onSupport) {
-        SendMessage response = SendMessage
-                .builder()
-                .chatId(chatId)
-                .text(str)
-                .build();
-        if (onSupport) setHelpButton(response);
-        try {
-            execute(response);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Method for adding a button that will bring up a list of active cities names.
-     * @param response container for outgoing message.
-     */
-    private void setHelpButton(SendMessage response) {
-        InlineKeyboardButton button = InlineKeyboardButton
-                .builder()
-                .text("help")
-                .callbackData("/help")
-                .build();
-        InlineKeyboardMarkup keyboardMarkup = InlineKeyboardMarkup
-                .builder()
-                .keyboardRow(Collections.singletonList(button))
-                .build();
-        response.setReplyMarkup(keyboardMarkup);
-    }
-
-    /**
-     * This method returns the bot's name, which was specified during registration.
-     * @return bot name
+     * This method returns the bot's credentials:
      */
     @Override
-    public String getBotUsername() {
-        return "TuristicJarvis_bot";
-    }
-
-    /**
-     * This method returns the bot's token for communicating with the Telegram server
-     * @return the bot's token
-     */
+    public String getBotUsername() {return credentialsProperties.getUsername();}
     @Override
     public String getBotToken() {
-        return "1522508704:AAFfMFeElDoVC3o1XfsgAZvSoEtjT_kb7lY";
+        return credentialsProperties.getToken();
+    }
+
+
+    private Message extractMessage(Update update) {
+        if (update.hasMessage()) {
+            var msg = update.getMessage();
+            return new Message(msg.getText(), msg.getChatId().toString());
+        } else if (update.hasCallbackQuery()) {
+            var cbq = update.getCallbackQuery();
+            return new Message(cbq.getData(), cbq.getFrom().getId().toString());
+        }
+        return null;
     }
 }
